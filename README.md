@@ -1,4 +1,8 @@
-# liblanshare
+# LANShare
 
-Share files easily in a local network.
-This is the C library that implements the lowlevel actions to discover clients and transfer files.
+Easily share your files in a local network.
+
+This repo contains a sample CLI application and a portable C library that
+implements the lowlevel actions to discover clients and transfer files.
+
+
