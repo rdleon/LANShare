@@ -18,3 +18,8 @@ Searches for other lanshares hosts in the network.
   `$ lanshare <host>`
 
 List all the available files being share by that host
+
+  `$ lanshare -g <host>:<file> [<output>]`
+
+Copies <file> from <host> to the current directory or the new path specified
+in <ouput>
