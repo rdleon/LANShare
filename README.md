@@ -2,24 +2,35 @@
 
 Easily share your files in a local network.
 
-This repo contains a sample CLI application and a portable C library that
-implements the lowlevel actions to discover clients and transfer files.
+This repo contains a sample command line application and a portable C library
+that implements the lowlevel actions to discover clients and transfer files.
 
 ## How does it work?
 
-  `$ lanshare -s`
+First, bring up a server that shares all the files in the current directory.
 
-Brings up a server that shares all the files in the current directory.
+    hostA$ lanshare -s
 
-  `$ lanshare`
+In another host, we search for lanshare servers in the network. This prints the
+list of available hosts.
 
-Searches for other lanshares hosts in the network.
+    hostB$ lanshare
+    hostA
+    host1
+    host2
+    ...
+    hostN
 
-  `$ lanshare <host>`
 
-List all the available files being share by that host
+We can get a list of all the available files being shared by certain <host>.
 
-  `$ lanshare -g <host>:<file> [<output>]`
+    hostB$ lanshare <host>
+    file_1
+    file_2
+    ...
+    file_N
 
-Copies <file> from <host> to the current directory or the new path specified
-in <ouput>
+Copies the specified <file> from <host> to the current working directory or
+the path specified in <ouput>.
+
+    hostB$ lanshare -g <host>:<file> [<output>]
