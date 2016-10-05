@@ -21,6 +21,7 @@
 *.dylib
 
 # Executables
+lanshare
 *.exe
 *.out
 *.app
