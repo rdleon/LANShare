@@ -21,7 +21,7 @@ list of available hosts.
 
 We can get a list of all the available files being shared by certain <host>.
 
-    hostB$ lanshare <host>:
+    hostB$ lanshare <host>
     file_1
     file_2
     ...
@@ -30,7 +30,7 @@ We can get a list of all the available files being shared by certain <host>.
 Copies the specified <file> from <host> to the current working directory or
 the path specified in <ouput>.
 
-    hostB$ lanshare <host>:<file> [<output>]
+    hostB$ lanshare <host> <file> [<output>]
 
 
 # Future Plans

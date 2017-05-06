@@ -1,27 +1,38 @@
 #!/usr/bin/python3
+import sys
 
 def serve(dirname=None):
     """
     Register as a zeroconf/Bonjour service and serves files in dirname directory
     if dirname is missing, it serves files from the current working directory.
     """
+    print("Serving files...")
 
 def list_hosts():
     """
     Scans the network for LANShare hosts and prints them to stdout.
     """
+    print("listing hosts...")
 
 def list_files(hostname):
     """
     Asks a host for a list of it's shared files and prints them to stdout.
     """
+    print("Listing files for", hostname)
 
 def get_file(hostname, filename, output=None):
     """
     Gets a filename from hostname and save it as output.
     """
+    print("Getting file {0} from {1}".format(filename, hostname))
 
-def parse_options():
+def usage():
+    """
+    Print the help message
+    """
+    print("lanshare help...")
+
+def parse_options(args):
     """
     Read the command line options and call the related function.
     + Serve files
@@ -29,6 +40,21 @@ def parse_options():
     + List files on a host
     + Get a file from a host
     """
+    if len(args) == 1:
+        list_hosts()
+    elif args[1] == "-S":
+        if len(sys.argv) > 2:
+            serve(args[2])
+        else:
+            serve()
+    elif args[1] == "-h":
+        usage()
+    elif len(args) == 2:
+        list_files(args[1])
+    else:
+        get_file(args[1], args[2])
+
 
 if __name__ == "__main__":
-    parse_options()
+    parse_options(sys.argv)
+
