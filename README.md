@@ -6,12 +6,12 @@ Easily share your files in a heterogeneus local network.
 
 First, bring up a server that shares all the files in the current directory.
 
-    hostA$ lanshare -s [<file/dir>]
+    hostA$ lanshare -S [<file/dir>]
 
 In another host, we search for lanshare servers in the network. This prints the
 list of available hosts.
 
-    hostB$ lanshare -f
+    hostB$ lanshare
     hostA
     host1
     host2
@@ -21,7 +21,7 @@ list of available hosts.
 
 We can get a list of all the available files being shared by certain <host>.
 
-    hostB$ lanshare -f <host>
+    hostB$ lanshare <host>:
     file_1
     file_2
     ...

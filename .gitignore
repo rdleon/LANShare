@@ -21,7 +21,6 @@
 *.dylib
 
 # Executables
-lanshare
 *.exe
 *.out
 *.app
@@ -32,3 +31,4 @@ lanshare
 # Debug files
 *.dSYM/
 *.su
+*.swp
