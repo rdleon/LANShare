@@ -192,7 +192,7 @@ def parse_options(args):
             serve(args[2])
         else:
             serve()
-    elif args[1] == "-h":
+    elif args[1] == "-h" or args[1] == "--help":
         usage()
     elif len(args) == 2:
         list_files(args[1])
