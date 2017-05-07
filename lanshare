@@ -1,7 +1,14 @@
 #!/usr/bin/python3
 import sys, socket
-from zeroconf import ServiceInfo, Zeroconf
+from zeroconf import ServiceInfo, ServiceBrowser, Zeroconf
 from time import sleep
+
+def listener(zeroconf, service_type, name, state_change):
+    """
+    Listener class for browsing zeroconf lanshare services
+    """
+    hostname = name.split('.')
+    print(hostname[0])
 
 def serve(dirname=None):
     """
@@ -11,15 +18,16 @@ def serve(dirname=None):
     # Register with the Zeroconf/Bonjour daemon
     hostname = socket.gethostname()
     ip_addr = socket.gethostbyname(hostname)
+    # Should ask the OS for a port binding to 0
     port = 10108
     desc = {'version': '0-alpha'}
 
     info = ServiceInfo("_lanshare._tcp.local.",
-            "{0}._lanshare._tcp.local.".format(hostname),
-            socket.inet_aton(ip_addr),
-            port, 0, 0,
-            desc,
-            "{0}.local.".format(hostname))
+                "{0}._lanshare._tcp.local.".format(hostname),
+                socket.inet_aton(ip_addr),
+                port, 0, 0,
+                desc,
+                "{0}.local.".format(hostname))
 
     zeroconf = Zeroconf()
     print("Press Ctrl-C to stop sharing...")
@@ -41,7 +49,13 @@ def list_hosts():
     """
     Scans the network for LANShare hosts and prints them to stdout.
     """
-    print("listing hosts...")
+    zeroconf = Zeroconf()
+    browser = ServiceBrowser(zeroconf,
+                    '_lanshare._tcp.local.',
+                    handlers=[listener])
+
+    sleep(1)
+    zeroconf.close()
 
 def list_files(hostname):
     """
