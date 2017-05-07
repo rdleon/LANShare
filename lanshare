@@ -10,11 +10,14 @@ def serve(dirname=None):
     """
     # Register with the Zeroconf/Bonjour daemon
     hostname = socket.gethostname()
-    desc = {'path': '/'}
+    ip_addr = socket.gethostbyname(hostname)
+    port = 10108
+    desc = {'version': '0-alpha'}
+
     info = ServiceInfo("_lanshare._tcp.local.",
-            "LS-{0}._lanshare._tcp.local.".format(hostname),
-            socket.inet_aton("127.0.0.1"),
-            80, 0, 0,
+            "{0}._lanshare._tcp.local.".format(hostname),
+            socket.inet_aton(ip_addr),
+            port, 0, 0,
             desc,
             "{0}.local.".format(hostname))
 
