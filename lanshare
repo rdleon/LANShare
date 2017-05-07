@@ -1,5 +1,6 @@
 #!/usr/bin/python3
-import sys, socket
+import os, sys, socket
+from os.path import isfile, join
 from zeroconf import ServiceInfo, ServiceBrowser, ServiceStateChange, Zeroconf
 from time import sleep
 
@@ -10,6 +11,17 @@ def print_hostnames(zeroconf, service_type, name, state_change):
     if state_change is ServiceStateChange.Added:
         hostname = name.split('.')
         print(hostname[0])
+
+def list_dir(dirname):
+    filelist = ""
+    if dirname is None:
+        dirname = os.getcwd()
+    for file in os.listdir(dirname):
+        if isfile(file):
+            filelist += join(dirname, file)
+            filelist += "\n"
+
+    return filelist
 
 def serve(dirname=None):
     """
@@ -43,7 +55,15 @@ def serve(dirname=None):
         while True:
             conn, addr = s.accept()
             data = conn.recv(1024)
-            print(data)
+            if data == b'LIST':
+                filelist = list_dir(dirname)
+                #conn.send(str.encode(filelist))
+                print('Files found:')
+                print(filelist)
+            elif data == b'GET':
+                print('Sending file...')
+            else:
+                print('Error, command not found')
             conn.close()
     except KeyboardInterrupt:
         # Stop on Ctrl+C
@@ -65,11 +85,10 @@ def list_hosts():
     sleep(0.5)
     zeroconf.close()
 
-def list_files(hostname):
-    """
-    Asks a host for a list of it's shared files and prints them to stdout.
-    """
+def get_hostinfo(hostname):
     hosts = []
+    host_info = None
+
     def get_hostnames(zeroconf, service_type, name, state_change):
         if state_change is ServiceStateChange.Added:
             hostname = name.split('.')
@@ -85,19 +104,26 @@ def list_files(hostname):
     zeroconf.close()
 
     fqdn = '{0}.local.'.format(hostname)
-    myServer = None
 
     for host in hosts:
         if host.server == fqdn:
-            myServer = host
+            host_info = host
 
-    if myServer is None:
+    return host_info
+
+def list_files(hostname):
+    """
+    Asks a host for a list of it's shared files and prints them to stdout.
+    """
+    host = get_hostinfo(hostname)
+
+    if host is None:
         print("Couldn't find host {0}".format(hostname))
         return
 
     print('Sending LIST command')
     s = socket.socket()
-    s.connect((socket.inet_ntoa(myServer.address), myServer.port))
+    s.connect((socket.inet_ntoa(host.address), host.port))
     s.send(b"LIST")
     s.shutdown(socket.SHUT_WR)
     s.close()
