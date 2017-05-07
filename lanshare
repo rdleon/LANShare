@@ -1,12 +1,38 @@
 #!/usr/bin/python3
-import sys
+import sys, socket
+from zeroconf import ServiceInfo, Zeroconf
+from time import sleep
 
 def serve(dirname=None):
     """
     Register as a zeroconf/Bonjour service and serves files in dirname directory
     if dirname is missing, it serves files from the current working directory.
     """
-    print("Serving files...")
+    # Register with the Zeroconf/Bonjour daemon
+    hostname = socket.gethostname()
+    desc = {'path': '/'}
+    info = ServiceInfo("_lanshare._tcp.local.",
+            "LS-{0}._lanshare._tcp.local.".format(hostname),
+            socket.inet_aton("127.0.0.1"),
+            80, 0, 0,
+            desc,
+            "{0}.local.".format(hostname))
+
+    zeroconf = Zeroconf()
+    print("Press Ctrl-C to stop sharing...")
+    zeroconf.register_service(info)
+
+    # Here is where we will serve the files
+    try:
+        while True:
+            sleep(0.1)
+    except KeyboardInterrupt:
+        # Stop on Ctrl+C
+        pass
+    finally:
+        # De-register the service
+        zeroconf.unregister_service(info)
+        zeroconf.close()
 
 def list_hosts():
     """
