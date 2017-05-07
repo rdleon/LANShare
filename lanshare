@@ -1,8 +1,10 @@
 #!/usr/bin/python3
-import os, sys, socket
+import os, sys, socket, socketserver
 from os.path import isfile, join
 from zeroconf import ServiceInfo, ServiceBrowser, ServiceStateChange, Zeroconf
 from time import sleep
+
+DirName = None
 
 def print_hostnames(zeroconf, service_type, name, state_change):
     """
@@ -18,10 +20,22 @@ def list_dir(dirname):
         dirname = os.getcwd()
     for file in os.listdir(dirname):
         if isfile(file):
-            filelist += join(dirname, file)
+            filelist += file
             filelist += "\n"
 
     return filelist
+
+class ShareHandler(socketserver.BaseRequestHandler):
+
+    def handle(self):
+        self.command = self.request.recv(1024).strip()
+        if self.command == b'LIST':
+            list_str = list_dir(DirName)
+            self.request.sendall(str.encode(list_str))
+        elif self.command == b'GET':
+            relf.request.sendall(b'2 Sending file...')
+        else:
+            self.request.sendall(b'3 Unknown command')
 
 def serve(dirname=None):
     """
@@ -46,25 +60,11 @@ def serve(dirname=None):
     print("Press Ctrl-C to stop sharing...")
     zeroconf.register_service(info)
 
-    s = socket.socket()
-    s.bind((hostname, port))
-    s.listen(1)
-
+    DirName = dirname
     # Here is where we will serve the files
     try:
-        while True:
-            conn, addr = s.accept()
-            data = conn.recv(1024)
-            if data == b'LIST':
-                filelist = list_dir(dirname)
-                #conn.send(str.encode(filelist))
-                print('Files found:')
-                print(filelist)
-            elif data == b'GET':
-                print('Sending file...')
-            else:
-                print('Error, command not found')
-            conn.close()
+        server = socketserver.TCPServer((hostname, port), ShareHandler)
+        server.serve_forever()
     except KeyboardInterrupt:
         # Stop on Ctrl+C
         pass
@@ -121,12 +121,20 @@ def list_files(hostname):
         print("Couldn't find host {0}".format(hostname))
         return
 
-    print('Sending LIST command')
-    s = socket.socket()
-    s.connect((socket.inet_ntoa(host.address), host.port))
-    s.send(b"LIST")
-    s.shutdown(socket.SHUT_WR)
-    s.close()
+    # Create a socket (SOCK_STREAM means a TCP socket)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    try:
+         # Connect to server and request list of files
+        sock.connect((socket.inet_ntoa(host.address), host.port))
+        sock.sendall(b"LIST")
+
+        # Receive data from the server and shut down
+        received = str(sock.recv(1024), "utf-8")
+    finally:
+        sock.close()
+
+    print(received)
 
 def get_file(hostname, filename, output=None):
     """
