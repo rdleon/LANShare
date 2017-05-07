@@ -31,7 +31,7 @@ class ShareHandler(socketserver.BaseRequestHandler):
         self.command = self.request.recv(1024).strip()
         if self.command == b'LIST':
             list_str = list_dir(DirName)
-            self.request.sendall(str.encode(list_str))
+            self.request.sendall(list_str.encode('utf-8'))
         elif self.command == b'GET':
             relf.request.sendall(b'2 Sending file...')
         else:
