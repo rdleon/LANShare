@@ -3,9 +3,9 @@ import sys, socket
 from zeroconf import ServiceInfo, ServiceBrowser, Zeroconf
 from time import sleep
 
-def listener(zeroconf, service_type, name, state_change):
+def print_hostname(zeroconf, service_type, name, state_change):
     """
-    Listener class for browsing zeroconf lanshare services
+    Prints the hostname to stdout
     """
     hostname = name.split('.')
     print(hostname[0])
@@ -52,7 +52,7 @@ def list_hosts():
     zeroconf = Zeroconf()
     browser = ServiceBrowser(zeroconf,
                     '_lanshare._tcp.local.',
-                    handlers=[listener])
+                    handlers=[print_hostname])
 
     sleep(1)
     zeroconf.close()
