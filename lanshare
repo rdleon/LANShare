@@ -1,14 +1,15 @@
 #!/usr/bin/python3
 import sys, socket
-from zeroconf import ServiceInfo, ServiceBrowser, Zeroconf
+from zeroconf import ServiceInfo, ServiceBrowser, ServiceStateChange, Zeroconf
 from time import sleep
 
-def print_hostname(zeroconf, service_type, name, state_change):
+def print_hostnames(zeroconf, service_type, name, state_change):
     """
     Prints the hostname to stdout
     """
-    hostname = name.split('.')
-    print(hostname[0])
+    if state_change is ServiceStateChange.Added:
+        hostname = name.split('.')
+        print(hostname[0])
 
 def serve(dirname=None):
     """
@@ -33,10 +34,17 @@ def serve(dirname=None):
     print("Press Ctrl-C to stop sharing...")
     zeroconf.register_service(info)
 
+    s = socket.socket()
+    s.bind((hostname, port))
+    s.listen(1)
+
     # Here is where we will serve the files
     try:
         while True:
-            sleep(0.1)
+            conn, addr = s.accept()
+            data = conn.recv(1024)
+            print(data)
+            conn.close()
     except KeyboardInterrupt:
         # Stop on Ctrl+C
         pass
@@ -52,16 +60,42 @@ def list_hosts():
     zeroconf = Zeroconf()
     browser = ServiceBrowser(zeroconf,
                     '_lanshare._tcp.local.',
-                    handlers=[print_hostname])
+                    handlers=[print_hostnames])
 
-    sleep(1)
+    sleep(0.5)
     zeroconf.close()
 
 def list_files(hostname):
     """
     Asks a host for a list of it's shared files and prints them to stdout.
     """
-    print("Listing files for", hostname)
+    hosts = []
+    def get_hostnames(zeroconf, service_type, name, state_change):
+        if state_change is ServiceStateChange.Added:
+            hostname = name.split('.')
+            host = zeroconf.get_service_info(service_type, name)
+            hosts.append(host)
+
+    zeroconf = Zeroconf()
+    browser = ServiceBrowser(zeroconf,
+                    '_lanshare._tcp.local.',
+                   handlers=[get_hostnames])
+
+    sleep(0.5)
+    zeroconf.close()
+
+    fqdn = '{0}.local.'.format(hostname)
+    myServer = None
+
+    for host in hosts:
+        if host.server == fqdn:
+            myServer = host
+
+    if myServer is None:
+        print("Couldn't find {0}".format(hostname))
+        return
+
+    print("My host:", myServer.server, myServer.port)
 
 def get_file(hostname, filename, output=None):
     """
