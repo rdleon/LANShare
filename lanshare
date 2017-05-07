@@ -92,10 +92,15 @@ def list_files(hostname):
             myServer = host
 
     if myServer is None:
-        print("Couldn't find {0}".format(hostname))
+        print("Couldn't find host {0}".format(hostname))
         return
 
-    print("My host:", myServer.server, myServer.port)
+    print('Sending LIST command')
+    s = socket.socket()
+    s.connect((socket.inet_ntoa(myServer.address), myServer.port))
+    s.send(b"LIST")
+    s.shutdown(socket.SHUT_WR)
+    s.close()
 
 def get_file(hostname, filename, output=None):
     """
