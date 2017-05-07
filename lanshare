@@ -141,12 +141,41 @@ def get_file(hostname, filename, output=None):
     Gets a filename from hostname and save it as output.
     """
     print("Getting file {0} from {1}".format(filename, hostname))
+    host = get_hostinfo(hostname)
+
+    if host is None:
+        print("Couldn't find host {0}".format(hostname))
+        return
+
+    # Create a socket (SOCK_STREAM means a TCP socket)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    if output is None:
+        output = filename
+
+    f = open(output, 'wb')
+
+    try:
+         # Connect to server and request list of files
+        sock.connect((socket.inet_ntoa(host.address), host.port))
+        command = "GET {0}".format(filename)
+        sock.sendall(command.encode('utf-8'))
+        b = sock.recv(1024)
+        while b:
+            f.write(b)
+            b = sock.recv(1024)
+    finally:
+        f.close()
+        sock.close()
 
 def usage():
     """
     Print the help message
     """
     print("lanshare help...")
+    print("  lanshare                          - List hosts")
+    print("  lanshare <host>                   - List files on hosts")
+    print("  lanshare <host> <file> [<output>] - List files on hosts")
+    print("  lanshare -S [<dir>]               - serve directory to the LAN")
 
 def parse_options(args):
     """
