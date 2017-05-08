@@ -43,12 +43,13 @@ class ShareHandler(socketserver.BaseRequestHandler):
                 self.request.sendall("5 missing file\n".encode('utf-8'))
                 return
 
+            # check for file
             if not os.path.isfile(parts[1]):
                 self.request.sendall("4 file not found\n".encode('utf-8'))
                 return
-            # check for file
-            self.request.sendall("3 sending file\n".encode('utf-8'))
+
             f = open(parts[1], 'rb')
+            self.request.sendall("3 sending file\n".encode('utf-8'))
             b = f.read(1024)
             while (b):
                 self.request.sendall(b)
@@ -113,9 +114,9 @@ def get_hostinfo(hostname):
 
     def get_hostnames(zeroconf, service_type, name, state_change):
         if state_change is ServiceStateChange.Added:
-            hostname = name.split('.')
             host = zeroconf.get_service_info(service_type, name)
-            hosts.append(host)
+            if host is not None:
+                hosts.append(host)
 
     zeroconf = Zeroconf()
     browser = ServiceBrowser(zeroconf,
