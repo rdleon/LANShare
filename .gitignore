@@ -32,3 +32,6 @@
 *.dSYM/
 *.su
 *.swp
+
+# Development files
+tags
