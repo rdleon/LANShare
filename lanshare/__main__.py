@@ -1,4 +1,5 @@
-#!/usr/bin/python3
+#!/usr/bin/env python
+
 import os, sys, socket, socketserver
 from os.path import isfile, join
 from zeroconf import ServiceInfo, ServiceBrowser, ServiceStateChange, Zeroconf
@@ -178,8 +179,7 @@ def download_file(host, port, filename, output):
             i = buff.index(b"\n")
             if i > 0:
                 buff = buff[i+1:]
-                f.write(buff)
-                buff = sock.recv(1024)
+# check the size of the buffer, if the buffer isn't full, stop.
                 while buff:
                     f.write(buff)
                     buff = sock.recv(1024)
@@ -212,8 +212,6 @@ def get_file(hostname, filename, output=None):
     browser = ServiceBrowser(zeroconf,
                     '_lanshare._tcp.local.',
                    handlers=[find_host])
-
-    sleep(10)
 
 def usage():
     """
