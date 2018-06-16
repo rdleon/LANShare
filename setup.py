@@ -1,8 +1,9 @@
 from setuptools import setup
+from lanshare.conf import __version__
 
 setup(name='lanshare',
-      version='0.1',
-      description='Sharing programs on the LAN',
+      version=__version__,
+      description='Share programs on a local network',
       url='https://github.com/hsmty/LANShare',
       author='Rafael Díaz de León Plata',
       author_email='leon@elinter.net',

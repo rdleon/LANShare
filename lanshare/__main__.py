@@ -4,8 +4,7 @@ import os, sys, socket, socketserver
 from os.path import isfile, join
 from zeroconf import ServiceInfo, ServiceBrowser, ServiceStateChange, Zeroconf
 from time import sleep
-
-__version__ = '0.1'
+from lanshare.conf import __version__
 
 def list_dir(dirname=None):
     file_list = ""
@@ -31,7 +30,7 @@ def serve(dirname=None):
     ip_addr = socket.gethostbyname(hostname)
     # Should ask the OS for a port binding to 0
     port = 10108
-    desc = {'version': '0-alpha'}
+    desc = {'version': __version__}
 
     info = ServiceInfo("_lanshare._tcp.local.",
                 "{0}._lanshare._tcp.local.".format(hostname),
@@ -112,7 +111,6 @@ def list_hosts():
                     '_lanshare._tcp.local.',
                     handlers=[print_hostnames])
 
-    sleep(0.2)
     zeroconf.close()
 
 def get_file_list(address, port):
