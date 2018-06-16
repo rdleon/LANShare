@@ -6,8 +6,13 @@ setup(name='lanshare',
       url='https://github.com/hsmty/LANShare',
       author='Rafael Díaz de León Plata',
       author_email='leon@elinter.net',
-      license='ISC',
+      license='MIT',
       packages=['lanshare'],
       install_requires=[
           'zeroconf',
-      ])
+      ],
+      entry_points = {
+          'console_scripts': [
+              'lanshare = lanshare.__main__:main'
+          ]
+      })
