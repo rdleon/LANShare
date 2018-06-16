@@ -5,6 +5,8 @@ from os.path import isfile, join
 from zeroconf import ServiceInfo, ServiceBrowser, ServiceStateChange, Zeroconf
 from time import sleep
 
+__version__ = '0.1'
+
 def list_dir(dirname=None):
     file_list = ""
 
@@ -218,6 +220,8 @@ def usage():
     Print the help message
     """
     print("lanshare help...")
+    print("  lanshare -h                       - Show this message")
+    print("  lanshare -v                       - Print version info and exit")
     print("  lanshare                          - List hosts")
     print("  lanshare <host>                   - List files on hosts")
     print("  lanshare <host> <file> [<output>] - List files on hosts")
@@ -233,6 +237,8 @@ def parse_options(args):
     """
     if len(args) == 1:
         list_hosts()
+    elif args[1] == "-v" or args[1] == "--version":
+        print("lanshare v{}".format(__version__))
     elif args[1] == "-S":
         if len(sys.argv) > 2:
             serve(args[2])
@@ -248,7 +254,9 @@ def parse_options(args):
         else:
             get_file(args[1], args[2], args[3])
 
+def main():
+    parse_options(sys.argv)
 
 if __name__ == "__main__":
-    parse_options(sys.argv)
+    main()
 
