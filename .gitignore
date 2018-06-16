@@ -29,6 +29,8 @@
 *.hex
 
 # Debug files
+lanshare.egg-info/
+lanshare/__pycache__/
 *.dSYM/
 *.su
 *.swp
