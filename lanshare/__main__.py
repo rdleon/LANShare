@@ -5,6 +5,7 @@ from zeroconf import ServiceInfo, ServiceBrowser, ServiceStateChange, Zeroconf
 from lanshare.conf import __version__
 from lanshare.discover import get_hosts, browse_host
 from lanshare.server import serve_files
+from lanshare.transfer import get_file
 
 def list_hosts():
     """
@@ -22,56 +23,6 @@ def list_files(hostname):
 
     for filename in files:
         print(filename)
-
-
-def download_file(host, port, filename, output):
-    # Create a socket (SOCK_STREAM means a TCP socket)
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    f = open(output, 'wb')
-
-    try:
-         # Connect to server and request list of files
-        sock.connect((host, port))
-        command = "GET {0}".format(filename)
-        sock.sendall(command.encode('utf-8'))
-        buff = sock.recv(1024)
-        if buff[0:1] == b'3':
-            i = buff.index(b"\n")
-            if i > 0:
-                buff = buff[i+1:]
-# check the size of the buffer, if the buffer isn't full, stop.
-                while buff:
-                    f.write(buff)
-                    buff = sock.recv(1024)
-            else:
-                print('Error getting file')
-        else:
-            print('Error getting file:', buff)
-    finally:
-        f.close()
-        sock.close()
-
-def get_file(hostname, filename, output=None):
-    """
-    Gets a filename from hostname and save it as output.
-    """
-    zeroconf = Zeroconf()
-    fqdn = '{0}.local.'.format(hostname)
-    finish = False
-
-    if output is None:
-        output = filename
-
-    def find_host(zeroconf, service_type, name, state_change):
-        if state_change is ServiceStateChange.Added:
-            host = zeroconf.get_service_info(service_type, name)
-            if host is not None and host.server == fqdn:
-                download_file(socket.inet_ntoa(host.address), host.port, filename, output)
-                print('finished downloading')
-
-    browser = ServiceBrowser(zeroconf,
-                    '_lanshare._tcp.local.',
-                   handlers=[find_host])
 
 def usage():
     """
@@ -95,7 +46,7 @@ def parse_options(args):
     """
     if len(args) == 1:
         list_hosts()
-    elif args[1] == "-v" or args[1] == "--version":
+    elif args[1] == "--version":
         print("lanshare v{}".format(__version__))
     elif args[1] == "-S":
         if len(sys.argv) > 2:
