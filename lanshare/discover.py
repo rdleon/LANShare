@@ -25,7 +25,7 @@ def get_hosts():
 
     return hosts
 
-def get_files(address, port):
+def list_files(address, port):
     """
     Returns a list of files shared by the given host
     """
@@ -73,7 +73,7 @@ def browse_host(hostname):
             if host is not None and host.server == fqdn:
                 found = True
                 address = socket_inet_ntoa(host.address)
-                filenames = get_files(address, host.port)
+                filenames = list_files(address, host.port)
 
     browser = ServiceBrowser(zeroconf,
                     '_lanshare._tcp.local.',
