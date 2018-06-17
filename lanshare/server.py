@@ -1,6 +1,6 @@
-import os, socket, socketserver
+import os, os.path, socket, socketserver
+from lanshare.conf import __block_size__
 
-__block_size__ = 1024
 shared_dir = None
 
 def list_directory(directory, hidden=False):
