@@ -1,4 +1,5 @@
 import os, os.path, socket, socketserver
+from zeroconf import ServiceInfo, Zeroconf
 from lanshare.conf import __block_size__
 
 shared_dir = None
@@ -64,14 +65,14 @@ def serve_files(dirname=None):
     in the supplied directory. If dirname is missing it serves files
     from the current working directory.
     """
-    hostname = socket.gethostname
+    hostname = socket.gethostname()
     ip_addr = socket.gethostbyname(hostname)
     # TODO: Ask the OS for a port binding
     port = 10108
     desc = {'version': '0.1'}
 
     info = ServiceInfo("_lanshare._tcp.local.",
-               "{0}._lanshare._tcp.local".format(hostname),
+               "{0}._lanshare._tcp.local.".format(hostname),
                socket.inet_aton(ip_addr),
                port, 0, 0, desc,
                "{0}.local.".format(hostname))

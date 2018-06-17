@@ -6,94 +6,7 @@ from zeroconf import ServiceInfo, ServiceBrowser, ServiceStateChange, Zeroconf
 from time import sleep
 from lanshare.conf import __version__
 from lanshare.discover import get_hosts, browse_host
-
-def list_dir(dirname=None):
-    file_list = ""
-
-    for file in os.listdir(dirname):
-        if file[0] == '.':
-            continue
-
-        path = os.path.join(dirname, file)
-        if os.path.isfile(path):
-            file_list += file
-            file_list += "\n"
-
-    return file_list
-
-def serve(dirname=None):
-    """
-    Register as a zeroconf/Bonjour service and serves files in dirname directory
-    if dirname is missing, it serves files from the current working directory.
-    """
-    # Register with the Zeroconf/Bonjour daemon
-    hostname = socket.gethostname()
-    ip_addr = socket.gethostbyname(hostname)
-    # Should ask the OS for a port binding to 0
-    port = 10108
-    desc = {'version': __version__}
-
-    info = ServiceInfo("_lanshare._tcp.local.",
-                "{0}._lanshare._tcp.local.".format(hostname),
-                socket.inet_aton(ip_addr),
-                port, 0, 0,
-                desc,
-                "{0}.local.".format(hostname))
-
-    zeroconf = Zeroconf()
-    print("Press Ctrl-C to stop sharing...")
-    zeroconf.register_service(info)
-
-    if dirname is None:
-        dirname = os.getcwd()
-
-    class ShareHandler(socketserver.BaseRequestHandler):
-
-        def handle(self):
-            command = self.request.recv(1024).strip()
-            parts = command.decode('utf-8').split(' ')
-
-            if parts[0] == 'LIST':
-                list_str = list_dir(dirname)
-                message = "2 listing files\n" + list_str
-                self.request.sendall(message.encode('utf-8'))
-
-            elif parts[0] == 'GET':
-                if len(parts) < 2:
-                    self.request.sendall("5 missing file\n".encode('utf-8'))
-                    return
-
-                # check for file
-                path = os.path.join(dirname, parts[1])
-                if not os.path.isfile(path):
-                    self.request.sendall("4 file not found\n".encode('utf-8'))
-                    return
-
-                f = open(path, 'rb')
-                self.request.sendall("3 sending file\n".encode('utf-8'))
-                b = f.read(1024)
-                while (b):
-                    self.request.sendall(b)
-                    b = f.read(1024)
-                f.close()
-
-            else:
-                self.request.sendall("1 unknown command\n".encode('utf-8'))
-
-    # Here is where we will serve the files
-    server = socketserver.TCPServer((hostname, port), ShareHandler)
-
-    try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        # Stop on Ctrl+C
-        pass
-    finally:
-        server.shutdown()
-        server.server_close()
-        # De-register the service
-        zeroconf.unregister_service(info)
-        zeroconf.close()
+from lanshare.server import serve_files
 
 def list_hosts():
     """
@@ -102,8 +15,6 @@ def list_hosts():
     hosts = get_hosts()
     for host in hosts:
         print(host)
-
-
 
 def list_files(hostname):
     """
@@ -190,9 +101,9 @@ def parse_options(args):
         print("lanshare v{}".format(__version__))
     elif args[1] == "-S":
         if len(sys.argv) > 2:
-            serve(args[2])
+            serve_files(args[2])
         else:
-            serve()
+            serve_files()
     elif args[1] == "-h" or args[1] == "--help":
         usage()
     elif len(args) == 2:
