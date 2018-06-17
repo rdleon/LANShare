@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
-import os, sys, socket, socketserver
-from os.path import isfile, join
+import sys, socket
 from zeroconf import ServiceInfo, ServiceBrowser, ServiceStateChange, Zeroconf
-from time import sleep
 from lanshare.conf import __version__
 from lanshare.discover import get_hosts, browse_host
 from lanshare.server import serve_files
@@ -116,7 +114,3 @@ def parse_options(args):
 
 def main():
     parse_options(sys.argv)
-
-if __name__ == "__main__":
-    main()
-
