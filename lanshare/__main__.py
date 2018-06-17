@@ -174,7 +174,7 @@ def usage():
     print("  lanshare                          - List hosts")
     print("  lanshare <host>                   - List files on hosts")
     print("  lanshare <host> <file> [<output>] - List files on hosts")
-    print("  lanshare -S [<dir>]               - serve directory to the LAN")
+    print("  lanshare -S [<dir>]               - Serve directory to the LAN")
 
 def parse_options(args):
     """
