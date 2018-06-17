@@ -1,4 +1,4 @@
-import socket
+import socket, sys
 from zeroconf import ServiceInfo, ServiceBrowser, ServiceStateChange, Zeroconf
 
 def get_hosts():
@@ -25,7 +25,7 @@ def get_hosts():
 
     return hosts
 
-def get_files(host, port):
+def get_files(address, port):
     """
     Returns a list of files shared by the given host
     """
@@ -55,3 +55,31 @@ def get_files(host, port):
     files.pop()
 
     return files
+
+def browse_host(hostname):
+    """
+    Gets the info of the hostname from mDNS
+    and then retrieves a list of files hosted
+    in that server and returns them
+    """
+    filenames = []
+    found = False
+    zeroconf = Zeroconf()
+    fqdn = '{0}.local.'.format(hostname)
+
+    def get_hostnames(zeroconf, service_type, name, state_change):
+        if state_change is ServiceStateChange.Added:
+            host = zeroconf.get_service_info(service_type, name)
+            if host is not None and host.server == fqdn:
+                found = True
+                address = socket_inet_ntoa(host.address)
+                filenames = get_files(address, host.port)
+
+    browser = ServiceBrowser(zeroconf,
+                    '_lanshare._tcp.local.',
+                   handlers=[get_hostnames])
+
+    if not found:
+        print("Couldn't find {0} in the network".format(hostname), file=sys.stderr)
+
+    return filenames

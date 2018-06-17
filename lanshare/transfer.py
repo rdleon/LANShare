@@ -1,11 +1,6 @@
 import sys, socket
 from zeroconf import Zeroconf, ServiceBrowser, ServiceStateChange
 
-def send(address, file):
-    """
-    Sends requested data to an address
-    """
-
 def download_file(host, port, filename, save_as):
     """
     Asks for a file to a LANShare server and

@@ -5,6 +5,7 @@ from os.path import isfile, join
 from zeroconf import ServiceInfo, ServiceBrowser, ServiceStateChange, Zeroconf
 from time import sleep
 from lanshare.conf import __version__
+from lanshare.discover import get_hosts, browse_host
 
 def list_dir(dirname=None):
     file_list = ""
@@ -98,70 +99,20 @@ def list_hosts():
     """
     Scans the network for LANShare hosts and prints them to stdout.
     """
-    def print_hostnames(zeroconf, service_type, name, state_change):
-        """
-        Prints the hostname to stdout
-        """
-        if state_change is ServiceStateChange.Added:
-            hostname = name.split('.')
-            print(hostname[0])
+    hosts = get_hosts()
+    for host in hosts:
+        print(host)
 
-    zeroconf = Zeroconf()
-    browser = ServiceBrowser(zeroconf,
-                    '_lanshare._tcp.local.',
-                    handlers=[print_hostnames])
-
-    zeroconf.close()
-
-def get_file_list(address, port):
-    """ Ask a lanshare server for a list of files. """
-    received = ""
-
-    # Create a socket (SOCK_STREAM means a TCP socket)
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    try:
-         # Connect to server and request list of files
-        sock.connect((address, port))
-        sock.sendall(b"LIST")
-
-        # Receive data from the server and shut down
-        # Needs size limit?
-        b = sock.recv(1024)
-        while b:
-            received += b.decode('utf-8')
-            b = sock.recv(1024)
-    finally:
-        sock.close()
-
-    if len(received) == 0 and received[0] != '2':
-        print("Error getting list of files from")
-        return
-
-    i = received.find('\n')
-    if i > 1:
-        received = received[i+1:]
-    print(received)
 
 
 def list_files(hostname):
     """
     Asks a host for a list of it's shared files and prints them to stdout.
     """
-    zeroconf = Zeroconf()
-    fqdn = '{0}.local.'.format(hostname)
+    files = browse_host(hostname)
 
-    def get_hostnames(zeroconf, service_type, name, state_change):
-        if state_change is ServiceStateChange.Added:
-            host = zeroconf.get_service_info(service_type, name)
-            if host is not None and host.server == fqdn:
-                get_file_list(socket.inet_ntoa(host.address), host.port)
-
-    browser = ServiceBrowser(zeroconf,
-                    '_lanshare._tcp.local.',
-                   handlers=[get_hostnames])
-
-    sleep(3)
+    for filename in files:
+        print(filename)
 
 
 def download_file(host, port, filename, output):
