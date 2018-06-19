@@ -4,6 +4,18 @@ from lanshare.conf import __block_size__
 
 shared_dir = None
 
+def get_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(('10.255.255.255', 1))
+        ip_addr = s.getsockname()[0]
+    except:
+        ip_addr = '127.0.0.1'
+    finally:
+        s.close()
+
+    return ip_addr
+
 def list_directory(directory, hidden=False):
     """
     Returns a list of files ready to be shared
@@ -65,11 +77,19 @@ def serve_files(dirname=None):
     in the supplied directory. If dirname is missing it serves files
     from the current working directory.
     """
-    hostname = socket.gethostname()
-    ip_addr = socket.gethostbyname(hostname)
-    # TODO: Ask the OS for a port binding
-    port = 10108
+    port = None
     desc = {'version': '0.1'}
+    hostname = socket.gethostname()
+    ip_addr = get_ip()
+
+    if dirname is not None:
+        shared_dir = dirname
+    else:
+        shared_dir = os.getcwd()
+
+    # Port 0 makes the socket ask the OS for a random port
+    server = socketserver.TCPServer((ip_addr, 0), ShareHandler)
+    (_, port) = server.socket.getsockname()
 
     info = ServiceInfo("_lanshare._tcp.local.",
                "{0}._lanshare._tcp.local.".format(hostname),
@@ -79,13 +99,6 @@ def serve_files(dirname=None):
 
     zeroconf = Zeroconf()
     zeroconf.register_service(info)
-
-    if dirname is not None:
-        shared_dir = dirname
-    else:
-        shared_dir = os.getcwd()
-
-    server = socketserver.TCPServer((hostname, port), ShareHandler)
 
     try:
         print("Press Ctrl-C to stop sharing...")
