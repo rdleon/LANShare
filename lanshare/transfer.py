@@ -8,14 +8,14 @@ def download_file(host, port, filename, save_as):
     saves it
     """
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    file = open(output, 'wb')
+    file = open(output, "wb")
 
     try:
         sock.connect((host, port))
-        command = 'GET {0}'.format(filename)
-        sock.sendall(command.encode('utf-8'))
+        command = "GET {0}".format(filename)
+        sock.sendall(command.encode("utf-8"))
         buff = sock.recv(__block_size__)
-        if buff[0:1] == b'3':
+        if buff[0:1] == b"3":
             i = buff.index(b"\n")
             if i > 0:
                 buff = buff[i+1:]
@@ -36,7 +36,7 @@ def get_file(hostname, filename, save_as=None):
     Requests a file and saves it to the given path
     """
     zeroconf = Zeroconf()
-    fqdn = '{0}.local.'.format(hostname)
+    fqdn = "{0}.local.".format(hostname)
 
     if output is None:
         output = filename
@@ -48,5 +48,5 @@ def get_file(hostname, filename, save_as=None):
                 download_file(socket.inet_ntoa(host.address), host.port, filename, output)
 
     browser = ServiceBrowser(zeroconf,
-                '_lanshare._tcp.local.',
+                "_lanshare._tcp.local.",
                 handlers=[find_host])

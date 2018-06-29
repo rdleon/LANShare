@@ -1,16 +1,16 @@
 import os, os.path, socket, socketserver
 from zeroconf import ServiceInfo, Zeroconf
-from lanshare.conf import __block_size__
+from lanshare.conf import __block_size__, __version__
 
 shared_dir = None
 
 def get_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        s.connect(('10.255.255.255', 1))
+        s.connect(("10.255.255.255", 1))
         ip_addr = s.getsockname()[0]
     except:
-        ip_addr = '127.0.0.1'
+        ip_addr = "127.0.0.1"
     finally:
         s.close()
 
@@ -23,10 +23,10 @@ def list_directory(directory, hidden=False):
     files = []
 
     for filename in os.listdir(dirname):
-        if not hidden and filename[0] == '.':
+        if not hidden and filename[0] == ".":
             continue
 
-        if filename == '.' or filename == '..':
+        if filename == "." or filename == "..":
             continue
 
         path = os.path.join(dirname, filename)
@@ -42,15 +42,15 @@ class ShareHandler(socketserver.BaseRequestHandler):
     """
     def handle(self):
         command = self.request.recv(__block_size__).strip()
-        parts = command.decode('utf-8').split(' ')
+        parts = command.decode("utf-8").split(" ")
 
-        if parts[0] == 'LIST':
+        if parts[0] == "LIST":
             files = list_dir(shared_dir)
             listing = files.join("\n")
-            message = "2 listing files\n" + listing.encode('utf-8')
+            message = "2 listing files\n" + listing.encode("utf-8")
             self.request.sendall(message)
 
-        elif parts[0] == 'GET':
+        elif parts[0] == "GET":
             if len(parts) < 2:
                 self.request.sendall("5 missing file\n")
                 return
@@ -60,7 +60,7 @@ class ShareHandler(socketserver.BaseRequestHandler):
                 self.request.sendall("4 file not found\n")
                 return
 
-            file = open(path, 'rb')
+            file = open(path, "rb")
             self.request.sendall("3 sending file\n")
             buff = file.read(__block_size__)
             while buff:
@@ -78,7 +78,7 @@ def serve_files(dirname=None):
     from the current working directory.
     """
     port = None
-    desc = {'version': '0.1'}
+    desc = {"version": __version__}
     hostname = socket.gethostname()
     ip_addr = get_ip()
 
