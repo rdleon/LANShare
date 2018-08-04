@@ -37,3 +37,7 @@ lanshare/__pycache__/
 
 # Development files
 tags
+bin/
+include/
+lib/
+share/
