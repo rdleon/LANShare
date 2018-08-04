@@ -3,7 +3,7 @@ from lanshare.conf import __version__
 
 setup(name='lanshare',
       version=__version__,
-      description='Share programs on a local network',
+      description='Share files on a local network',
       url='https://github.com/hsmty/LANShare',
       author='Rafael Díaz de León Plata',
       author_email='leon@elinter.net',
