@@ -1,16 +1,15 @@
-import socket, sys
+import socket
+import sys
+
 from zeroconf import ServiceInfo, ServiceBrowser, ServiceStateChange, Zeroconf
 
+
 def get_hosts():
-    """
-    Returns a list of available hosts in the network
-    """
+    """Returns a list of available hosts in the network."""
     hosts = []
 
     def search_hostnames(zeroconf, service_type, name, state_change):
-        """
-        Prints the hostname to stdout
-        """
+        """Prints the hostname to stdout."""
         if state_change is ServiceStateChange.Added:
             hostname = name.split('.')
             hosts.append(hostname[0])
@@ -25,10 +24,9 @@ def get_hosts():
 
     return hosts
 
+
 def list_files(address, port):
-    """
-    Returns a list of files shared by the given host
-    """
+    """Returns a list of files shared by the given host."""
     files = []
     received = ""
 
@@ -57,10 +55,10 @@ def list_files(address, port):
     return files
 
 def browse_host(hostname):
-    """
-    Gets the info of the hostname from mDNS
-    and then retrieves a list of files hosted
-    in that server and returns them
+    """Get a list of files stored in a host.
+
+    First searches for the hostname in mDNS and then
+    asks the host for a list of files.
     """
     filenames = []
     found = False
@@ -80,6 +78,7 @@ def browse_host(hostname):
                    handlers=[get_hostnames])
 
     if not found:
-        print("Couldn't find {0} in the network".format(hostname), file=sys.stderr)
+        print("Couldn't find {0} in the network".format(hostname),
+              file=sys.stderr)
 
     return filenames
