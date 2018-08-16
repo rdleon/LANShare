@@ -7,29 +7,29 @@ from lanshare.conf import __block_size__
 
 def download_file(host, port, filename, save_as):
     """Asks for a file to a LANShare server and saves it."""
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    file = open(output, "wb")
-
-    try:
-        sock.connect((host, port))
-        command = "GET {0}".format(filename)
-        sock.sendall(command.encode("utf-8"))
-        buff = sock.recv(__block_size__)
-        if buff[0] == b"3":
-            i = buff.index(b"\n")
-            if i > 0:
-                buff = buff[i+1:]
-                while buff:
-                    f.write(buff)
-                    buff = sock.recv(__block_size__)
-            else:
-                print("Error saving the file", file=sys.stderr)
+    # TODO: Check for the file to exists and create
+    with open(output, "wb") as f, socket.socket(socket.AF_INET,
+                                                socket.SOCK_STREAM) as s:
+        try:
+            s.connect((host, port))
+        except:
+            print("Could not connect to host", host, file=sys.stderr)
         else:
-            print("File {0} not found".format(filename), file=sys.stderr)
-        # TODO: delete file if transfer fails
-    finally:
-        f.close()
-        sock.close()
+            command = "GET {0}".format(filename)
+            s.sendall(command.encode("utf-8"))
+            buff = s.recv(__block_size__)
+            if buff[0] == b"3":
+                i = buff.index(b"\n")
+                if i > 0:
+                    buff = buff[i+1:]
+                    while buff:
+                        f.write(buff)
+                        buff = s.recv(__block_size__)
+                else:
+                    print("Error saving the file", file=sys.stderr)
+            else:
+                print("File {0} not found".format(filename), file=sys.stderr)
+                # TODO: delete file if transfer fails
 
 
 def get_file(hostname, filename, save_as=None):
