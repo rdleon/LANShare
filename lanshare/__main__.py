@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
-import sys, socket
-from zeroconf import ServiceInfo, ServiceBrowser, ServiceStateChange, Zeroconf
+import sys
+
 from lanshare.conf import __version__
-from lanshare.discover import get_hosts, browse_host
+from lanshare.discover import browse_host, get_hosts
 from lanshare.server import serve_files
 from lanshare.transfer import get_file
+
 
 def list_hosts():
     """
@@ -14,6 +15,7 @@ def list_hosts():
     hosts = get_hosts()
     for host in hosts:
         print(host)
+
 
 def list_files(hostname):
     """
@@ -24,17 +26,19 @@ def list_files(hostname):
     for filename in files:
         print(filename)
 
+
 def usage():
     """
     Print the help message
     """
     print("lanshare help...")
     print("  lanshare -h                       - Show this message")
-    print("  lanshare -v                       - Print version info and exit")
+    print("  lanshare --version                - Print version info and exit")
     print("  lanshare                          - List hosts")
     print("  lanshare <host>                   - List files on hosts")
     print("  lanshare <host> <file> [<output>] - List files on hosts")
     print("  lanshare -S [<dir>]               - Serve directory to the LAN")
+
 
 def parse_options(args):
     """
@@ -62,6 +66,7 @@ def parse_options(args):
             get_file(args[1], args[2])
         else:
             get_file(args[1], args[2], args[3])
+
 
 def main():
     parse_options(sys.argv)
